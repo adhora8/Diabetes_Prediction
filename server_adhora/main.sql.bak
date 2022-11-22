@@ -1,0 +1,928 @@
+SET SERVEROUTPUT ON;
+SET VERIFY OFF;
+--@"E:\All materials DDS lab\pl-sql\normalizeYes.sql";
+--@"E:\All materials DDS lab\pl-sql\normalizeNo.sql"
+CLEAR SCREEN;
+DECLARE
+    yes_count NUMBER := 0;
+    no_count NUMBER := 0; 
+    freyc NUMBER := 0;
+    frenc NUMBER := 0;
+    noryc NUMBER := 0;
+    nornc NUMBER := 0;
+    irryc NUMBER := 0;
+    irrnc NUMBER := 0;
+    hiyc NUMBER := 0;
+    hinc NUMBER := 0;
+    loyc NUMBER := 0;
+    lonc NUMBER := 0;
+    boryc NUMBER := 0;
+    bornc NUMBER := 0;
+    sudyc NUMBER := 0;
+    sudnc NUMBER := 0;
+    plyc NUMBER := 0;
+    plnc NUMBER := 0;
+    p_yes NUMBER (10,3);
+    p_no NUMBER (10,3);
+    p_frequent_yes NUMBER (10,3);
+    p_frequent_no NUMBER (10,3);
+    p_normal_yes NUMBER (10,3);
+    p_normal_no NUMBER (10,3);
+    p_irregular_yes NUMBER (10,3);
+    p_irregular_no NUMBER (10,3);
+    p_high_yes NUMBER (10,3);
+    p_high_no NUMBER (10,3);
+    p_low_yes NUMBER (10,3);
+    p_low_no NUMBER (10,3);
+    p_borderline_yes NUMBER (10,3);
+    p_borderline_no NUMBER (10,3);
+    p_sudden_yes NUMBER (10,3);
+    p_sudden_no NUMBER (10,3);
+    p_planned_yes NUMBER (10,3);
+    p_planned_no NUMBER (10,3);
+    dataset_count NUMBER ;
+    testset_count NUMBER :=0;
+    random_testcase NUMBER(3,0);
+    f_random NUMBER(3,0);
+
+    pnb_yes NUMBER (10,3);
+    pnb_no NUMBER (10,3);
+
+
+    final_probability_yes NUMBER (10,3);
+    final_probability_no NUMBER (10,3);
+    
+
+    out_l VARCHAR2(10);
+    temp VARCHAR2(10);
+    hum VARCHAR2(10);
+    diabetes_prediction VARCHAR2(10);
+    actual_data VARCHAR2(10);
+
+    not_getting_test_count EXCEPTION;
+
+
+
+
+BEGIN
+    
+    --select count (id) from dataset where rain = 'yes';
+    SELECT COUNT(*) INTO yes_count FROM DATASET WHERE DIABETES_RESULT  = 'yes';
+    SELECT COUNT(*) INTO no_count FROM DATASET WHERE DIABETES_RESULT  = 'no';
+    SELECT COUNT(*) INTO freyc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Urination = 'frequent';
+    SELECT COUNT(*) INTO frenc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Urination = 'frequent';
+    SELECT COUNT(*) INTO noryc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Urination = 'normal';
+    SELECT COUNT(*) INTO nornc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Urination = 'normal';
+    SELECT COUNT(*) INTO irryc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Urination = 'irregular';
+    SELECT COUNT(*) INTO irrnc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Urination = 'irregular';
+    SELECT COUNT(*) INTO hiyc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Blood_Glucose_L = 'high';
+    SELECT COUNT(*) INTO hinc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Blood_Glucose_L= 'high';
+    SELECT COUNT(*) INTO loyc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Blood_Glucose_L = 'low';
+    SELECT COUNT(*) INTO lonc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Blood_Glucose_L = 'low';
+    SELECT COUNT(*) INTO boryc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Blood_Glucose_L = 'borderline';
+    SELECT COUNT(*) INTO bornc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Blood_Glucose_L = 'borderline';
+    SELECT COUNT(*) INTO sudyc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Weight_Loss = 'sudden';
+    SELECT COUNT(*) INTO sudnc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Weight_Loss = 'sudden';
+    SELECT COUNT(*) INTO plyc FROM DATASET WHERE DIABETES_RESULT  = 'yes' AND Weight_Loss = 'planned';
+    SELECT COUNT(*) INTO plnc FROM DATASET WHERE DIABETES_RESULT  = 'no' AND Weight_Loss= 'planned';
+
+
+    SELECT COUNT(ID) INTO dataset_count FROM DATASET;
+
+
+    dbms_output.put_line('Total freyc =' || freyc);
+    dbms_output.put_line('Total freno =' || frenc);
+    dbms_output.put_line('Total noryc ='|| noryc);
+    dbms_output.put_line('Total nornc =' || nornc );
+    dbms_output.put_line('Total irryc =' || irryc);
+    dbms_output.put_line('Total irrnc =' ||irrnc);
+    dbms_output.put_line('Total hiyc =' || hiyc);
+    dbms_output.put_line('Total hinc =' || hinc);
+    dbms_output.put_line('Total loyc =' ||loyc);
+    dbms_output.put_line('Total lonc =' || lonc);
+    dbms_output.put_line('Total boryc =' || boryc);
+    dbms_output.put_line('Total bornc =' ||bornc);
+    dbms_output.put_line('Total sudyc =' ||sudyc);
+    dbms_output.put_line('Total sudnc =' ||sudnc);
+    dbms_output.put_line('Total plyc =' || plyc);
+    dbms_output.put_line('Total plnc =' || plnc);
+    
+    p_yes := yes_count/dataset_count;
+    p_no := no_count/dataset_count;
+    p_frequent_yes := freyc/yes_count;
+    p_frequent_no := frenc/no_count;
+    p_normal_yes := noryc/yes_count;
+    p_normal_no := nornc/no_count;
+    p_irregular_yes := irryc/yes_count;
+    p_irregular_no := irrnc/no_count;
+    p_high_yes := hiyc/yes_count;
+    p_high_no := hinc/no_count;
+    p_low_yes := loyc/yes_count;
+    p_low_no := lonc/no_count;
+    p_borderline_yes := boryc/yes_count;
+    p_borderline_no := bornc/no_count;
+    p_sudden_yes := sudyc/yes_count;
+    p_sudden_no := sudnc/no_count;
+    p_planned_yes := plyc/yes_count;
+    p_planned_no := plnc/no_count;
+
+    dbms_output.put_line('Total yes'||p_yes);
+    dbms_output.put_line('Total no'|| p_no);
+
+    
+    --SELECT COUNT(ID) INTO dataset_count FROM DATASET;
+    --dbms_output.put_line(dataset_count);
+
+    SELECT COUNT(ID) INTO testset_count FROM TESTSET@SITE1;
+    --dbms_output.put_line(testset_count);
+    
+
+    random_testcase := dbms_random.value(1,testset_count);
+    f_random := random_testcase;
+    --dbms_output.put_line(f_random);
+
+
+
+    SELECT Urination, Blood_Glucose_L , Weight_Loss INTO out_l, temp, hum FROM TESTSET@SITE1 WHERE ID = f_random;
+    DBMS_OUTPUT.PUT_LINE(CHR(10));  --What is CHR 10?Chr(10) is the Line Feed character
+
+    dbms_output.put_line('Extaxted from Site1:');
+    dbms_output.put_line(f_random);
+    dbms_output.put_line(out_l|| '--' || temp || '--'|| hum);
+    --dbms_output.put_line(temp);
+    --dbms_output.put_line(hum);
+
+    
+
+    IF (out_l = 'frequent' AND temp = 'high' AND hum = 'sudden')  then
+        
+        dbms_output.put_line('combination 1');
+
+        pnb_yes := (p_yes * p_frequent_yes * p_high_yes * p_sudden_yes);
+        pnb_no := (p_no * p_frequent_no * p_high_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+
+    END IF;
+
+
+
+    IF (out_l = 'frequent' AND temp = 'high' AND hum = 'planned')  then
+        dbms_output.put_line('combination 2');
+
+        pnb_yes := (p_yes * p_frequent_yes * p_high_yes * p_planned_yes);
+        pnb_no := (p_no * p_frequent_no * p_high_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'frequent' AND temp = 'low' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 3');
+
+        pnb_yes := (p_yes * p_frequent_yes * p_low_yes * p_sudden_yes);
+        pnb_no := (p_no * p_frequent_no * p_low_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'frequent' AND temp = 'low' AND hum = 'planned')  then
+        dbms_output.put_line('combination 4');
+        pnb_yes := (p_yes * p_frequent_yes * p_low_yes * p_planned_yes);
+        pnb_no := (p_no * p_frequent_no * p_low_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'frequent' AND temp = 'borderline' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 5');
+        pnb_yes := (p_yes * p_frequent_yes * p_borderline_yes * p_sudden_yes);
+        pnb_no := (p_no * p_frequent_no * p_borderline_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'frequent' AND temp = 'borderline' AND hum = 'planned')  then
+        dbms_output.put_line('combination 6');
+        pnb_yes := (p_yes * p_frequent_yes * p_borderline_yes * p_planned_yes);
+        pnb_no := (p_no * p_frequent_no * p_borderline_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'frequent' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'high' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 7');
+        pnb_yes := (p_yes * p_normal_yes * p_high_yes * p_sudden_yes);
+        pnb_no := (p_no * p_normal_no * p_high_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'high' AND hum = 'planned')  then
+        dbms_output.put_line('combination 8');
+
+        pnb_yes := (p_yes * p_normal_yes * p_high_yes * p_planned_yes);
+        pnb_no := (p_no * p_normal_no * p_high_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'low' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 9');
+         pnb_yes := (p_yes * p_normal_yes * p_low_yes * p_sudden_yes);
+        pnb_no := (p_no * p_normal_no * p_low_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'low' AND hum = 'planned')  then
+        dbms_output.put_line('combination 10');
+        pnb_yes := (p_yes * p_normal_yes * p_low_yes * p_planned_yes);
+        pnb_no := (p_no * p_normal_no * p_low_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'borderline' AND hum = 'planned')  then
+        dbms_output.put_line('combination 11');
+        pnb_yes := (p_yes * p_normal_yes * p_borderline_yes * p_planned_yes);
+        pnb_no := (p_no * p_normal_no * p_borderline_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    END IF;
+
+    IF (out_l = 'normal' AND temp = 'borderline' AND hum = 'planned')  then
+        dbms_output.put_line('combination 12');
+
+        pnb_yes := (p_yes * p_normal_yes * p_borderline_yes * p_planned_yes);
+        pnb_no := (p_no * p_normal_no * p_borderline_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'normal' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'high' AND hum = 'planned')  then
+      
+        dbms_output.put_line('combination 13');
+
+        pnb_yes := (p_yes * p_irregular_yes * p_high_yes * p_planned_yes);
+        pnb_no := (p_no * p_irregular_no * p_high_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'high' AND hum = 'planned')  then
+        dbms_output.put_line('combination 14');
+
+        pnb_yes := (p_yes * p_irregular_yes * p_high_yes * p_planned_yes);
+        pnb_no := (p_no * p_irregular_no * p_high_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'high' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'low' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 15');
+
+        pnb_yes := (p_yes * p_irregular_yes * p_low_yes * p_sudden_yes);
+        pnb_no := (p_no * p_irregular_no * p_low_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'low' AND hum = 'planned')  then
+        dbms_output.put_line('combination 16');
+        pnb_yes := (p_yes * p_irregular_yes * p_low_yes * p_planned_yes);
+        pnb_no := (p_no * p_irregular_no * p_low_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'low' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+    
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'borderline' AND hum = 'sudden')  then
+        dbms_output.put_line('combination 17');
+
+        pnb_yes := (p_yes * p_irregular_yes * p_borderline_yes * p_sudden_yes);
+        pnb_no := (p_no * p_irregular_no * p_borderline_no * p_sudden_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'sudden') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+    END IF;
+
+    IF (out_l = 'irregular' AND temp = 'borderline' AND hum = 'planned')  then
+        dbms_output.put_line('combination 18');
+
+         pnb_yes := (p_yes * p_irregular_yes * p_borderline_yes * p_planned_yes);
+        pnb_no := (p_no * p_irregular_no * p_borderline_no * p_planned_no);
+
+        final_probability_yes  := normalizeYes(pnb_yes, pnb_no);
+        final_probability_no := normalizeNo(pnb_yes, pnb_no);
+
+        dbms_output.put_line(final_probability_yes); 
+
+
+        
+        IF (final_probability_yes > final_probability_no) then
+          diabetes_prediction := 'yes';
+        END IF;
+
+        IF (final_probability_yes < final_probability_no) then
+          diabetes_prediction := 'no';
+        END IF;
+
+        dbms_output.put_line('diabetes_prediction : '|| diabetes_prediction);
+
+        FOR RowData IN (SELECT * FROM DATASET) LOOP
+            IF (RowData.Urination = 'irregular' AND RowData.Blood_Glucose_L = 'borderline' AND RowData.Weight_Loss = 'planned') THEN
+                --dbms_output.put_line('true');
+                actual_data := RowData.DIABETES_RESULT;
+                dbms_output.put_line('actual_data : ' || actual_data); 
+                -- dbms_output.put_line(actual_data);
+                EXIT;
+            END IF;
+	    END LOOP;
+
+        IF (actual_data = diabetes_prediction) then
+          dbms_output.put_line('Right Prediction');
+        END IF;
+
+        IF (actual_data <> diabetes_prediction) then
+          dbms_output.put_line('Wrong Prediction');
+        END IF;
+
+    END IF;
+
+
+
+EXCEPTION 
+    
+   -- WHEN not_getting_test_count THEN
+       -- dbms_output.put_line("Not getting row count from Site1!");
+    WHEN no_data_found THEN 
+        dbms_output.put_line('No data found!'); 
+    WHEN others THEN 
+        dbms_output.put_line('Error!');
+
+END;
+/
